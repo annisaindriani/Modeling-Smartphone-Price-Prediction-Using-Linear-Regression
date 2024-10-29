@@ -13,7 +13,7 @@ To get started, clone this repository and install the required dependencies.
 ```
 
 ### Dataset
-The dataset used in this project can be downloaded from [Kaggle](https://www.kaggle.com/datasets/mohannapd/mobile-price-prediction?select=Cellphone.csv).
+The dataset used in this project can be downloaded from [Kaggle](https://www.kaggle.com/datasets/mohannapd/mobile-price-prediction?select=Cellphone.csv)
 
 ## Contact
 Annisa Indriani - indrianiannisa8@gmail.com - [LinkedIn](https://www.linkedin.com/in/annisaindriani)
