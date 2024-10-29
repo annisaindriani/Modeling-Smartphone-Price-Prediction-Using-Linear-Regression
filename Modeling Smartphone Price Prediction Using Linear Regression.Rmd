@@ -1,0 +1,224 @@
+---
+title: "Modeling Smartphone Price Prediction Using Linear Regression"
+author: "Annisa Indriani"
+date: "2024-10-29"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Import Data
+
+```{r}
+library(readr)
+data <- read.csv("Cellphone.csv", sep=";")
+head(data)
+```
+
+## Exploratory Data Analysis
+
+### Check Data Structure 
+
+```{r}
+str(data)
+```
+
+### Check Summary 
+
+```{r}
+summary(data)
+```
+
+### Check Missing Values
+
+```{r}
+colSums(is.na(data))
+```
+
+### Correlation Heatmap
+
+```{r}
+library(dplyr)
+correlation_matrix <- cor(data %>% select_if(is.numeric))
+
+library(ggplot2)
+library(reshape2)
+melted_correlation <- melt(correlation_matrix)
+ggplot(data = melted_correlation, aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = 'blue', high = 'red', mid = 'white', 
+                       midpoint = 0, limit = c(-1, 1), name = 'Correlation') +
+  theme_minimal() +
+  labs(title = 'Correlation Heatmap')
+```
+
+## Linear Regression Model
+
+### Price + Internal Memory
+
+```{r}
+library(lmtest)
+m1 <- lm(Price ~ internal.mem, data = data)
+summary(m1)
+```
+
+From the summary above, we can see that the model is significant because the p-value is less than alpha 0.05. In addition, the variable also has a p-value below 0.05, which means that there is a relationship between internal memory and mobile phone price.
+
+### Price + RAM
+
+```{r}
+m2 = lm(Price ~ ram, data = data)
+summary(m2)
+```
+
+From the summary above, we can see that the model is significant because the p-value is less than alpha 0.05. In addition, the variable also has a p-value below 0.05, which means that there is a relationship between RAM and mobile phone price.
+
+### Price + Battery
+
+```{r}
+m3 = lm(Price ~ battery, data = data)
+summary(m3)
+```
+
+From the summary above, we can see that the model is significant because the p-value is less than alpha 0.05. In addition, the variable also has a p-value below 0.05, which means that there is a relationship between battery and mobile phone price.
+
+### Price + RearCam
+
+```{r}
+m4 = lm(Price ~ RearCam, data = data)
+summary(m4)
+```
+
+From the summary above, we can see that the model is significant because the p-value is less than alpha 0.05. In addition, the variable also has a p-value below 0.05, which means that there is a relationship between internal rear camera and mobile phone price.
+
+### Price + Internal Memory + RAM + Battery + RearCam
+
+```{r}
+m5 = lm(Price ~ internal.mem + ram + battery + RearCam, data = data)
+summary(m5)
+```
+
+From the summary above, we can see that the model is significant as the p-value is smaller than alpha 0.05. In addition, all variables except internal memory have a p-value below 0.05, which means there is a relationship between ram, battery, rear cam and phone price.
+
+### Price + RAM + Battery + RearCam
+
+```{r}
+m6 = lm(Price ~ ram + battery + RearCam, data = data)
+summary(m6)
+```
+
+From the summary above, we can see that the model is significant because the p-value is less than alpha 0.05. In addition, the variable also has a p-value below 0.05, which means there is a relationship between ram, battery, rear cam and phone price.
+
+## Assumptions Test
+
+### Independent
+
+```{r}
+dwtest(m1, alternative = "two.sided")
+```
+
+```{r}
+dwtest(m2, alternative = "two.sided")
+```
+
+```{r}
+dwtest(m3, alternative = "two.sided")
+```
+
+```{r}
+dwtest(m4, alternative = "two.sided")
+```
+
+```{r}
+dwtest(m5, alternative = "two.sided")
+```
+
+```{r}
+dwtest(m6, alternative = "two.sided")
+```
+
+The Durbin-Watson test results for Models 1, 2, 5, and 6 have a p-value of more than alpha 0.05, which indicates that the independence assumption is met. In contrast, for Models 3 and 4, the p-value is less than 0.05, indicating that the independence assumption is not met, and therefore, they cannot be used for further analysis.
+
+### Identic
+
+```{r}
+library(car)
+```
+
+```{r}
+bptest(m1)
+```
+
+```{r}
+bptest(m2)
+```
+
+```{r}
+bptest(m5)
+```
+
+```{r}
+bptest(m6)
+```
+
+The Breusch-Pagan test results for Models 1, 2, 5, and 6 have a p-value of more than alpha 0.05, indicating that the identical assumption is met.
+
+### Normality
+
+```{r}
+library(nortest)
+```
+
+```{r}
+e1 <- residuals(m1)
+shapiro.test(e1)
+```
+
+```{r}
+e2 <- residuals(m2)
+shapiro.test(e2)
+```
+
+```{r}
+e5 <- residuals(m5)
+shapiro.test(e5)
+```
+
+```{r}
+e6 <- residuals(m6)
+shapiro.test(e6)
+```
+
+The Shapiro-Wilk test results for Model 2 have a p-value of more than alpha 0.05, which indicates that the normality assumption is met. Meanwhile, the remaining models do not meet the normality assumption because the p-value is less than 0.05 so they cannot be used for further analysis.
+
+### Multicollinearity
+
+```{r}
+vif(m6)
+```
+
+A VIF value of less than 10 indicates that there is no multicollinearity in the RAM variable with other variables.
+
+## Goodness of the Model
+
+### MSE
+
+```{r}
+mean((e2^2))
+```
+
+### RMSE
+
+```{r}
+sqrt(mean((e2^2)))
+```
+
+### AIC
+
+```{r}
+AIC(m2)
+```
+
+Although the value of evaluation metrics may not be as good or as small as other models, Model 2 is a model that can be used for analysis because there are no model assumptions that are violated.
